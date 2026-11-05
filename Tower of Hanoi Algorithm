@@ -1,0 +1,33 @@
+
+def hanoi_solver(n):
+    towers = {
+        "A": list(range(n, 0, -1)),
+        "B": [],
+        "C": []
+    }
+
+    moves = []
+
+    def save_state():
+        current = f"{towers['A']} {towers['B']} {towers['C']}"
+        moves.append(current)
+
+    def solve_hanoi(count, start, end, helper):
+        if count == 1:
+            disk = towers[start].pop()
+            towers[end].append(disk)
+            save_state()
+            return
+
+        solve_hanoi(count - 1, start, helper, end)
+
+        moved_disk = towers[start].pop()
+        towers[end].append(moved_disk)
+        save_state()
+
+        solve_hanoi(count - 1, helper, end, start)
+
+    save_state()
+    solve_hanoi(n, "A", "C", "B")
+
+    return "\n".join(moves)
