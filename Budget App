@@ -1,0 +1,101 @@
+
+class Category:
+    def __init__(self, name):
+        self.name = name
+        self.records = []
+
+    def deposit(self, amount, description=""):
+        entry = {"amount": amount, "description": description}
+        self.records.append(entry)
+
+    def withdraw(self, amount, description=""):
+        if amount > self.get_balance():
+            return False
+
+        entry = {"amount": -amount, "description": description}
+        self.records.append(entry)
+        return True
+
+    def get_balance(self):
+        balance = 0
+        for entry in self.records:
+            balance += entry["amount"]
+        return balance
+
+    def transfer(self, amount, category):
+        if amount > self.get_balance():
+            return False
+
+        self.withdraw(amount, "Transfer to " + category.name)
+        category.deposit(amount, "Transfer from " + self.name)
+        return True
+
+    def check_funds(self, amount):
+        balance = self.get_balance()
+        return balance >= amount
+
+    def __str__(self):
+        output = self.name.center(30, "*") + "\n"
+
+        for entry in self.records:
+            description = entry["description"][:23]
+            amount = entry["amount"]
+
+            output += description.ljust(23)
+            output += "{:.2f}".format(amount).rjust(7) + "\n"
+
+        output += "Total: {:.2f}".format(self.get_balance())
+        return output
+
+
+def create_spend_chart(categories):
+    chart = "Percentage spent by category\n"
+    spending = []
+
+    for category in categories:
+        expense = 0
+
+        for entry in category.records:
+            if entry["amount"] < 0:
+                expense += -entry["amount"]
+
+        spending.append(expense)
+
+    total = sum(spending)
+
+    percentages = []
+    for expense in spending:
+        if total == 0:
+            percentages.append(0)
+        else:
+            value = (expense / total) * 100
+            percentages.append(int(value / 10) * 10)
+
+    for level in range(100, -1, -10):
+        chart += str(level).rjust(3) + "| "
+
+        for percentage in percentages:
+            chart += "o  " if percentage >= level else "   "
+
+        chart += "\n"
+
+    chart += "    " + "-" * (len(categories) * 3 + 1) + "\n"
+
+    longest = 0
+    for category in categories:
+        if len(category.name) > longest:
+            longest = len(category.name)
+
+    for position in range(longest):
+        chart += "     "
+
+        for category in categories:
+            if position < len(category.name):
+                chart += category.name[position] + "  "
+            else:
+                chart += "   "
+
+        if position < longest - 1:
+            chart += "\n"
+
+    return chart
